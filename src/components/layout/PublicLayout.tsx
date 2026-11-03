@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
+import { MobileBottomNav } from './MobileBottomNav';
 
 export const PublicLayout: React.FC = () => {
   return (
@@ -11,6 +12,7 @@ export const PublicLayout: React.FC = () => {
         <Outlet />
       </main>
       <Footer />
+      <MobileBottomNav />
     </div>
   );
 };
