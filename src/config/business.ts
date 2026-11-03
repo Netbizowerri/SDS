@@ -2,10 +2,10 @@ import { BusinessSettings } from '../types';
 
 export const DEFAULT_BUSINESS_SETTINGS: BusinessSettings = {
   businessName: 'SDS Delivery',
-  phone: '0811 136 8265',
-  whatsappNumber: '+2348111368265',
-  email: 'dispatch@sdsdelivery.ng', // PLACEHOLDER
-  address: 'Hub 7, Commercial Avenue, Yaba, Lagos, Nigeria', // PLACEHOLDER
+  phone: '0810 649 6160',
+  whatsappNumber: '+2348106496160',
+  email: 'dispatch@sds.com.ng',
+  address: 'Abuja, Nigeria',
   cacNumber: 'RC-1940294 (PLACEHOLDER)', // PLACEHOLDER
   operatingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
   operatingHoursStart: '06:00',

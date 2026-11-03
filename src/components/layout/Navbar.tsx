@@ -67,7 +67,7 @@ export const Navbar: React.FC = () => {
               className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors border border-emerald-200/60"
             >
               <MessageSquare className="w-3.5 h-3.5 fill-current" />
-              <span>0811 136 8265</span>
+              <span>{DEFAULT_BUSINESS_SETTINGS.phone}</span>
             </a>
 
             <Link
@@ -122,7 +122,7 @@ export const Navbar: React.FC = () => {
               className="w-full flex items-center justify-center gap-2 py-2.5 px-4 text-xs font-medium text-emerald-800 bg-emerald-50 rounded-lg border border-emerald-200"
             >
               <MessageSquare className="w-4 h-4 fill-current" />
-              <span>Chat with Dispatch: 0811 136 8265</span>
+              <span>Chat with Dispatch: {DEFAULT_BUSINESS_SETTINGS.phone}</span>
             </a>
 
             <div className="pt-2 px-1 text-xs flex items-center justify-between">

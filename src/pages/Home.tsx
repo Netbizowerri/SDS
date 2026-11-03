@@ -27,9 +27,9 @@ export const Home: React.FC = () => {
     navigate(`/track?code=${encodeURIComponent(quickTrackCode.trim())}`);
   };
 
-  const heroImage = '/src/assets/images/sds_hero_logistics_1793606858153.jpg';
-  const handoverImage = '/src/assets/images/sds_delivery_handover_1793606856258.jpg';
-  const warehouseImage = '/src/assets/images/sds_warehouse_dispatch_1793606858271.jpg';
+  const heroImage = 'https://res.cloudinary.com/titznrnk/image/upload/v1793692440/mzDtZ_1.jpg';
+  const handoverImage = 'https://res.cloudinary.com/titznrnk/image/upload/v1793691883/Untitled_Design_2.jpg';
+  const courierImage = 'https://res.cloudinary.com/titznrnk/image/upload/v1793693103/SDS.jpg';
 
   const dispatchChatLink = buildWhatsAppLink(
     DEFAULT_BUSINESS_SETTINGS.phone,
@@ -74,7 +74,7 @@ export const Home: React.FC = () => {
                   className="inline-flex items-center gap-2 px-5 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-sm rounded-lg transition-colors"
                 >
                   <MessageSquare className="w-4 h-4 text-emerald-400 fill-current" />
-                  <span>WhatsApp 0811 136 8265</span>
+                  <span>WhatsApp {DEFAULT_BUSINESS_SETTINGS.phone}</span>
                 </a>
               </div>
 
@@ -316,7 +316,7 @@ export const Home: React.FC = () => {
               <div className="space-y-4">
                 <img
                   src={handoverImage}
-                  alt="Customer receiving courier parcel with friendly smile"
+                  alt="Courier handing a parcel to a smiling customer and confirming handover on a clipboard"
                   className="rounded-xl object-cover h-56 w-full shadow-lg"
                   referrerPolicy="no-referrer"
                 />
@@ -332,8 +332,8 @@ export const Home: React.FC = () => {
                   <p className="text-slate-300 mt-1">From 06:00 to 02:00 Africa/Lagos. Pickups scheduled around your day.</p>
                 </div>
                 <img
-                  src={warehouseImage}
-                  alt="Organized parcel logistics sorting center"
+                  src={courierImage}
+                  alt="Smiling courier in red uniform holding a delivery package in her vehicle"
                   className="rounded-xl object-cover h-56 w-full shadow-lg"
                   referrerPolicy="no-referrer"
                 />

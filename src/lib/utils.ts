@@ -15,7 +15,7 @@ export function formatNaira(kobo: number): string {
 }
 
 /**
- * Mask phone number for privacy on public quote links (e.g. +234 811 *** **65)
+ * Mask phone number for privacy on public quote links (e.g. +234 810 *** **60)
  */
 export function maskPhone(phone: string): string {
   if (!phone) return '';

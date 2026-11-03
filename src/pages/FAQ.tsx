@@ -13,7 +13,7 @@ export const FAQ: React.FC = () => {
     },
     {
       q: 'Can the receiver pay for the delivery instead of the sender?',
-      a: 'Absolutely! On Step 3 of the request form, you specify who pays (Sender or Receiver). The private quote link is designed to be forwarded to whichever party is paying. To protect customer privacy when the link is forwarded, the page displays first names only and masks phone numbers (e.g., +234 811 *** **65).',
+      a: 'Absolutely! On Step 3 of the request form, you specify who pays (Sender or Receiver). The private quote link is designed to be forwarded to whichever party is paying. To protect customer privacy when the link is forwarded, the page displays first names only and masks phone numbers (e.g., +234 810 *** **60).',
     },
     {
       q: 'What payment methods do you support?',
