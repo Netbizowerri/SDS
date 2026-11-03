@@ -1,0 +1,6 @@
+{
+  "name": "SDS Delivery",
+  "description": "Nationwide and worldwide courier booking, tracking, private quote payments, and manual dispatch management platform.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
