@@ -274,7 +274,7 @@ service cloud.firestore {
       allow create: if validNewOrder(request.resource.data);
       allow get, list: if isOrderReader(resource.data);
       allow update: if isOperationsStaff() && validStaffOrderUpdate() || validRiderOrderUpdate();
-      allow delete: if false;
+      allow delete: if isOwner();
     }
 
     match /riders/{riderId} {
@@ -288,7 +288,8 @@ service cloud.firestore {
     match /payouts/{payoutId} {
       allow get, list: if isOperationsStaff() || isRider(resource.data.riderId);
       allow create: if isOwner() && validPayout(request.resource.data);
-      allow update, delete: if false;
+      allow update: if false;
+      allow delete: if isOwner();
     }
 
     match /settings/{settingId} {

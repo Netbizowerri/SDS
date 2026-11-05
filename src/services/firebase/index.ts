@@ -443,3 +443,23 @@ export const SettingsService = {
     return updated;
   },
 };
+
+export const AdminDataService = {
+  async deleteAllOperationalData(): Promise<{ orders: number; riders: number; payouts: number }> {
+    const collections = [ORDERS, RIDERS, PAYOUTS] as const;
+    const counts = { orders: 0, riders: 0, payouts: 0 };
+    const countKeys = { [ORDERS]: 'orders', [RIDERS]: 'riders', [PAYOUTS]: 'payouts' } as const;
+
+    for (const name of collections) {
+      const snapshot = await getDocs(collection(firestore, name));
+      for (let offset = 0; offset < snapshot.docs.length; offset += 450) {
+        const batch = writeBatch(firestore);
+        snapshot.docs.slice(offset, offset + 450).forEach((item) => batch.delete(item.ref));
+        await batch.commit();
+      }
+      counts[countKeys[name]] = snapshot.size;
+    }
+
+    return counts;
+  },
+};

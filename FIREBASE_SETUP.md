@@ -31,3 +31,13 @@ From the repository folder, run `npm run dev`, then open `http://localhost:3000/
 Create each staff account under **Authentication -> Users**. For an operations manager, add a `staff/{uid}` document with `name`, `email`, and `role: manager`. For a rider, first create the rider record in the admin console, then add `staff/{uid}` with `name`, `email`, `role: rider`, and `riderId` set to that rider record's document ID.
 
 Customers can submit requests without accounts. Only authorized staff can read and process requests. Payment details, payment confirmation, and tracking updates are handled offline by SDS staff. The old browser demo seed data is not imported into Firestore.
+
+## 6. Deploy the latest Firestore rules
+
+The owner-only operational data reset requires the updated rules that permit owners to delete order, rider, and payout records. To publish the rules from the repository folder, run:
+
+```bash
+npx -y firebase-tools@latest deploy --only firestore:rules --project sdsdelivery-7d4b2
+```
+
+The reset action appears in **Admin → Settings** for the owner account. It requires typing `DELETE` and removes all documents in `orders`, `riders`, and `payouts`; it keeps `staff` and `settings`.

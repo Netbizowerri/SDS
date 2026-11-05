@@ -1,5 +1,6 @@
 // Preserve the existing import path while application data now lives in Firebase.
 export {
+  AdminDataService,
   AuthService,
   EarningsService,
   OrdersService,

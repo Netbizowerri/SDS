@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Settings as SettingsIcon, AlertCircle, CheckCircle2, MessageSquare, Clock } from 'lucide-react';
-import { SettingsService, AuthService } from '../../services/mock';
+import { Save, AlertCircle, CheckCircle2, MessageSquare, Trash2 } from 'lucide-react';
+import { AdminDataService, SettingsService, AuthService } from '../../services/mock';
 import { BusinessSettings } from '../../types';
 import { DEFAULT_BUSINESS_SETTINGS } from '../../config/business';
-import { formatNaira } from '../../lib/utils';
 
 export const AdminSettings: React.FC = () => {
   const [settings, setSettings] = useState<BusinessSettings>(DEFAULT_BUSINESS_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteMessage, setDeleteMessage] = useState('');
+  const [deleteError, setDeleteError] = useState('');
 
   const currentUser = AuthService.getCurrentUser();
   const isOwner = currentUser?.role === 'owner';
@@ -29,6 +32,22 @@ export const AdminSettings: React.FC = () => {
       setTimeout(() => setIsSaved(false), 2500);
     } catch (err: any) {
       alert(err.message);
+    }
+  };
+
+  const handleDeleteOperationalData = async () => {
+    if (deleteConfirmation !== 'DELETE' || isDeleting) return;
+    setIsDeleting(true);
+    setDeleteMessage('');
+    setDeleteError('');
+    try {
+      const counts = await AdminDataService.deleteAllOperationalData();
+      setDeleteMessage(`Deleted ${counts.orders} order bookings, ${counts.riders} rider profiles, and ${counts.payouts} rider payout records.`);
+      setDeleteConfirmation('');
+    } catch (error) {
+      setDeleteError(error instanceof Error ? error.message : 'The data reset did not complete. Some records may already have been deleted; check the collections and retry.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -244,6 +263,47 @@ export const AdminSettings: React.FC = () => {
           <span>Save System Settings</span>
         </button>
       </form>
+
+      <section className="bg-white p-6 rounded-2xl border border-rose-200 shadow-sm space-y-4">
+        <div>
+          <h2 className="text-xs font-bold uppercase tracking-wider text-rose-800 flex items-center gap-2">
+            <Trash2 className="w-4 h-4" />
+            Reset operational data
+          </h2>
+          <p className="text-xs text-slate-600 mt-2">
+            Permanently deletes every order booking, rider profile, and rider payout record in this Firebase project. Staff accounts and business settings are kept. This cannot be undone.
+          </p>
+        </div>
+
+        {deleteMessage && <p role="status" className="text-xs text-emerald-800">{deleteMessage}</p>}
+        {deleteError && <p role="alert" className="text-xs text-rose-700">{deleteError}</p>}
+
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
+          <div className="flex-1">
+            <label htmlFor="delete-confirmation" className="block font-semibold text-slate-700 mb-1 text-xs">
+              Type DELETE to enable the reset
+            </label>
+            <input
+              id="delete-confirmation"
+              type="text"
+              autoComplete="off"
+              value={deleteConfirmation}
+              onChange={(event) => setDeleteConfirmation(event.target.value)}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono text-xs"
+              placeholder="DELETE"
+              disabled={isDeleting}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={handleDeleteOperationalData}
+            disabled={deleteConfirmation !== 'DELETE' || isDeleting}
+            className="px-4 py-2.5 bg-rose-700 hover:bg-rose-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-xs rounded-lg transition-colors"
+          >
+            {isDeleting ? 'Deleting records...' : 'Delete all operational data'}
+          </button>
+        </div>
+      </section>
     </div>
   );
 };
