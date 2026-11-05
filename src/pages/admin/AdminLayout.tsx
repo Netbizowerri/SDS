@@ -37,7 +37,7 @@ export const AdminLayout: React.FC = () => {
 
   const handleLogout = async () => {
     await AuthService.logout();
-    navigate('/admin/login');
+    navigate('/stafflogin');
   };
 
   return (

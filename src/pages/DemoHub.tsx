@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Bike, ClipboardList, Package, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Bike, ClipboardList, Package } from 'lucide-react';
 
 export const DemoHub: React.FC = () => (
   <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -13,18 +13,12 @@ export const DemoHub: React.FC = () => (
         </p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Link to="/request" className="bg-white rounded-xl border border-slate-200 p-5 space-y-3 hover:border-emerald-500 transition-colors">
           <Package className="w-5 h-5 text-emerald-600" />
           <h2 className="font-bold text-slate-900">Submit a request</h2>
           <p className="text-xs text-slate-600">Send pickup, delivery, and parcel details to SDS.</p>
           <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700">Open booking form <ArrowRight className="w-3.5 h-3.5" /></span>
-        </Link>
-        <Link to="/admin/login" className="bg-white rounded-xl border border-slate-200 p-5 space-y-3 hover:border-emerald-500 transition-colors">
-          <ShieldCheck className="w-5 h-5 text-slate-700" />
-          <h2 className="font-bold text-slate-900">Staff console</h2>
-          <p className="text-xs text-slate-600">Review requests, confirm offline payments, and assign dispatches.</p>
-          <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700">Staff sign in <ArrowRight className="w-3.5 h-3.5" /></span>
         </Link>
         <Link to="/rider/login" className="bg-white rounded-xl border border-slate-200 p-5 space-y-3 hover:border-emerald-500 transition-colors">
           <Bike className="w-5 h-5 text-emerald-600" />

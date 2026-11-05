@@ -39,7 +39,7 @@ import { AdminSettings } from './pages/admin/AdminSettings';
 
 function RequireRole({ roles }: { roles: Array<'owner' | 'manager' | 'rider'> }) {
   const user = AuthService.getCurrentUser();
-  if (!user) return <Navigate to={roles.includes('rider') ? '/rider/login' : '/admin/login'} replace />;
+  if (!user) return <Navigate to={roles.includes('rider') ? '/rider/login' : '/stafflogin'} replace />;
   if (roles.includes(user.role)) return <Outlet />;
   return <Navigate to={user.role === 'rider' ? '/rider' : '/admin'} replace />;
 }
@@ -104,7 +104,7 @@ export default function App() {
         </Route>
 
         {/* Admin Console Routes */}
-        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/stafflogin" element={<AdminLogin />} />
         <Route element={<RequireRole roles={['owner', 'manager']} />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />

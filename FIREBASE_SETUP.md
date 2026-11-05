@@ -24,7 +24,7 @@ The `staff` collection is intentionally read-only to app users. Create or edit s
 
 ## 4. Sign in locally
 
-From the repository folder, run `npm run dev`, then open `http://localhost:3000/admin/login`. Sign in with the owner account created above. The app reads the matching `staff/{uid}` document to determine the role.
+From the repository folder, run `npm run dev`, then open `http://localhost:3000/stafflogin`. Sign in with the owner account created above. The app reads the matching `staff/{uid}` document to determine the role. Staff sign-in is not linked from the public login or registration screens.
 
 ## 5. Add more staff and riders
 
