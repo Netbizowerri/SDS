@@ -29,7 +29,7 @@ export const RiderLayout: React.FC = () => {
 
           <div className="flex items-center gap-2 text-xs">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-slate-300 font-medium">{user?.name?.split(' ')[0] || 'Tunde'}</span>
+            <span className="text-slate-300 font-medium">{user?.name?.split(' ')[0] || 'Rider'}</span>
           </div>
         </div>
 

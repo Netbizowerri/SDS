@@ -15,7 +15,7 @@ export const DEFAULT_BUSINESS_SETTINGS: BusinessSettings = {
   baseExpressChargeKobo: 350000, // 3,500 NGN
   baseHandlingChargeKobo: 150000, // 1,500 NGN
   quoteWhatsappTemplate:
-    'Hello {customerName},\nYour SDS delivery quote for order {orderCode} is ready: {total}.\n\nSecure payment link:\n{link}\n(Valid until {validUntil})\n\nOnce paid, your dispatch courier will be assigned immediately.',
+    'Hello {customerName},\nYour SDS delivery quote for order {orderCode} is ready: {total}.\n\n{link}\n(Quote valid until {validUntil})\n\nPlease reply when your transfer is complete. SDS will confirm receipt and then assign a rider.',
   riderWhatsappTemplate:
     'Hi {riderName},\nYou have been assigned delivery {orderCode}.\nRoute: {pickupCity} to {deliveryCity}.\nScheduled pickup: {pickupTime}.\nTrip Pay: {tripPay}.\n\nOpen job in SDS Rider app:\n{link}',
 };

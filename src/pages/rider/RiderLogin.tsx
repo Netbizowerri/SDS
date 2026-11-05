@@ -5,8 +5,8 @@ import { AuthService } from '../../services/mock';
 
 export const RiderLogin: React.FC = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('rider.tunde@sdsdelivery.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -20,19 +20,17 @@ export const RiderLogin: React.FC = () => {
     setIsLoading(true);
     setErrorMsg(null);
     try {
-      await AuthService.login('rider', email);
+      const user = await AuthService.login(email, password);
+      if (user.role !== 'rider') {
+        await AuthService.logout();
+        throw new Error('This account is set up for the operations console.');
+      }
       navigate('/rider');
-    } catch {
-      setErrorMsg('Invalid login credentials. Please check your details.');
+    } catch (error) {
+      setErrorMsg(error instanceof Error ? error.message : 'Invalid login credentials. Please check your details.');
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleDemoQuickLogin = async (riderEmail: string) => {
-    setIsLoading(true);
-    await AuthService.login('rider', riderEmail);
-    navigate('/rider');
   };
 
   return (
@@ -113,28 +111,7 @@ export const RiderLogin: React.FC = () => {
           </button>
         </form>
 
-        {/* Demo Fast Login Shortcuts */}
-        <div className="pt-4 border-t border-slate-100 space-y-2">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 text-center">
-            Demo Rider Accounts
-          </p>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <button
-              onClick={() => handleDemoQuickLogin('rider.tunde@sdsdelivery.com')}
-              className="p-2 rounded-lg border border-slate-200 hover:border-emerald-500 text-left bg-slate-50 transition-colors"
-            >
-              <span className="font-bold text-slate-800 block">Tunde Bakare</span>
-              <span className="text-[10px] text-slate-500">Motorcycle · 42 Jobs</span>
-            </button>
-            <button
-              onClick={() => handleDemoQuickLogin('chidi.rider@sdsdelivery.com')}
-              className="p-2 rounded-lg border border-slate-200 hover:border-emerald-500 text-left bg-slate-50 transition-colors"
-            >
-              <span className="font-bold text-slate-800 block">Chidi Okonkwo</span>
-              <span className="text-[10px] text-slate-500">Van · 68 Jobs</span>
-            </button>
-          </div>
-        </div>
+        <p className="text-center text-[11px] text-slate-500">Rider accounts are created by the SDS project owner.</p>
 
         <div className="text-center pt-2">
           <Link to="/" className="text-xs text-slate-500 hover:text-slate-800 underline">

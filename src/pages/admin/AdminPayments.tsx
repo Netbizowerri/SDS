@@ -71,7 +71,7 @@ export const AdminPayments: React.FC = () => {
             Payments & Collections
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Verified online Paystack transactions and recorded manual transfers.
+            Payments confirmed manually by SDS operations staff.
           </p>
         </div>
 
@@ -148,7 +148,7 @@ export const AdminPayments: React.FC = () => {
               <thead className="bg-slate-50 text-slate-500 border-b border-slate-200 font-medium">
                 <tr>
                   <th className="py-3 px-3">Order</th>
-                  <th className="py-3 px-3">Paystack Reference</th>
+                  <th className="py-3 px-3">Payment Reference</th>
                   <th className="py-3 px-3">Customer</th>
                   <th className="py-3 px-3">Designation</th>
                   <th className="py-3 px-3">Method</th>

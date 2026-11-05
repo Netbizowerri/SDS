@@ -20,12 +20,8 @@ export const AdminLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const user = AuthService.getCurrentUser() || {
-    id: 'user-owner',
-    name: 'Chief Emeka (Owner)',
-    email: 'admin@sdsdelivery.com',
-    role: 'owner',
-  };
+  const user = AuthService.getCurrentUser();
+  if (!user || user.role === 'rider') return null;
 
   const isOwner = user.role === 'owner';
 

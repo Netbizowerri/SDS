@@ -15,7 +15,7 @@ export const RiderSignature: React.FC = () => {
   const [success, setSuccess] = useState(false);
 
   const currentUser = AuthService.getCurrentUser();
-  const riderId = currentUser?.riderId || 'rider-1';
+  const riderId = currentUser?.riderId || '';
 
   useEffect(() => {
     if (!id) return;

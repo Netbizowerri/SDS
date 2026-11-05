@@ -1,13 +1,12 @@
 import React from 'react';
-import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import { CheckCircle2, MessageSquare, ArrowRight, Home, Search, ShieldCheck } from 'lucide-react';
+import { useSearchParams, Link } from 'react-router-dom';
+import { CheckCircle2, MessageSquare, Home, ShieldCheck } from 'lucide-react';
 import { CopyButton, WhatsAppButton } from '../components/ui/Buttons';
 import { DEFAULT_BUSINESS_SETTINGS } from '../config/business';
 
 export const RequestSubmitted: React.FC = () => {
   const [searchParams] = useSearchParams();
   const code = searchParams.get('code') || 'SDS-829410';
-  const navigate = useNavigate();
 
   const whatsappInquiry = `Hello SDS Dispatch, I just submitted request ${code}. When will the quote be ready?`;
 
@@ -24,7 +23,7 @@ export const RequestSubmitted: React.FC = () => {
         </h1>
 
         <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
-          Your delivery request is now in our central dispatch queue. Our operations team will calculate your route quote and send the private payment link directly to your WhatsApp.
+          Your delivery request is in the SDS dispatch queue. Our operations team will review it, contact you with a quote and payment details, and confirm your payment manually before assigning a rider.
         </p>
 
         {/* Tracking Code Box */}
@@ -39,7 +38,7 @@ export const RequestSubmitted: React.FC = () => {
             <CopyButton text={code} label="Copy Code" />
           </div>
           <p className="text-[11px] text-slate-400">
-            Keep this code safe to check live milestones on our tracking portal.
+            Keep this code safe and include it when you contact dispatch for updates.
           </p>
         </div>
 
@@ -57,8 +56,8 @@ export const RequestSubmitted: React.FC = () => {
             to={`/track?code=${encodeURIComponent(code)}`}
             className="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold shadow-sm transition-all flex items-center justify-center gap-2"
           >
-            <Search className="w-4 h-4" />
-            <span>Track This Order Now</span>
+            <MessageSquare className="w-4 h-4" />
+            <span>Ask Dispatch for Updates</span>
           </Link>
 
           <Link

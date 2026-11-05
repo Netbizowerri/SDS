@@ -17,7 +17,7 @@ export const Footer: React.FC = () => {
               <span className="text-xl font-bold text-white tracking-tight">Delivery</span>
             </Link>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Nationwide and worldwide prompt courier logistics. Professional, manual dispatch with direct private quote payments and proof of delivery.
+              Nationwide and worldwide courier logistics. Personal dispatch support, direct payment instructions, and proof of delivery.
             </p>
             <div className="pt-2 text-[11px] text-slate-500 space-y-1">
               <p>CAC Reg: <span className="text-slate-400">{DEFAULT_BUSINESS_SETTINGS.cacNumber}</span></p>
@@ -88,7 +88,7 @@ export const Footer: React.FC = () => {
             <div className="p-4 bg-slate-900 rounded-lg border border-slate-800 space-y-3 text-xs">
               <div className="flex items-start gap-2.5 text-slate-300">
                 <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <span>Verified Paystack 256-bit SSL encrypted online payments</span>
+                <span>Payment receipt confirmed by SDS operations staff</span>
               </div>
               <div className="flex items-start gap-2.5 text-slate-300">
                 <Clock className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />

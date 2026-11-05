@@ -8,7 +8,6 @@ import {
   Clock,
   CheckCircle2,
   AlertCircle,
-  Upload,
   X,
   ArrowRight,
   ArrowLeft,
@@ -75,40 +74,6 @@ export const RequestDelivery: React.FC = () => {
   const isOperatingDay = (dateStr: string) => {
     const dayName = new Date(dateStr).toLocaleDateString('en-US', { weekday: 'long' });
     return DEFAULT_BUSINESS_SETTINGS.operatingDays.includes(dayName);
-  };
-
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    if (formData.photos.length + files.length > 3) {
-      alert('Maximum of 3 package photos allowed.');
-      return;
-    }
-
-    Array.from(files).forEach((file) => {
-      if (file.size > 5 * 1024 * 1024) {
-        alert(`${file.name} exceeds 5 MB limit.`);
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setFormData((prev) => ({
-            ...prev,
-            photos: [...prev.photos, event.target!.result as string].slice(0, 3),
-          }));
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const removePhoto = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      photos: prev.photos.filter((_, i) => i !== index),
-    }));
   };
 
   const validateStep1 = () => {
@@ -705,7 +670,7 @@ export const RequestDelivery: React.FC = () => {
                       </span>
                       <div>
                         <p className="text-xs font-bold">Sender Pays</p>
-                        <p className="text-[11px] text-slate-500">I (the sender) will receive the quote link and pay online.</p>
+                        <p className="text-[11px] text-slate-500">SDS staff will contact the sender with the quote and payment instructions.</p>
                       </div>
                     </button>
 
@@ -746,39 +711,7 @@ export const RequestDelivery: React.FC = () => {
                   />
                 </div>
 
-                {/* Photos upload (mock up to 3) */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
-                    Package Photos (Optional, up to 3, max 5MB each)
-                  </label>
-                  <div className="flex flex-wrap gap-3">
-                    {formData.photos.map((src, i) => (
-                      <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden border border-slate-300">
-                        <img src={src} alt={`Package preview ${i + 1}`} className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => removePhoto(i)}
-                          className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-0.5 hover:bg-black"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-
-                    {formData.photos.length < 3 && (
-                      <label className="w-20 h-20 border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-lg flex flex-col items-center justify-center cursor-pointer bg-slate-50 text-slate-500 transition-colors">
-                        <Upload className="w-4 h-4 mb-1" />
-                        <span className="text-[10px]">Add photo</span>
-                        <input
-                          type="file"
-                          accept="image/jpeg,image/png,image/webp"
-                          onChange={handlePhotoUpload}
-                          className="hidden"
-                        />
-                      </label>
-                    )}
-                  </div>
-                </div>
+                <p className="text-[11px] text-slate-500">Package photo uploads will be added after secure file storage is configured.</p>
 
                 {/* Special Instructions */}
                 <div>
@@ -935,7 +868,7 @@ export const RequestDelivery: React.FC = () => {
                       className="w-4 h-4 text-emerald-600 rounded mt-0.5 focus:ring-emerald-500"
                     />
                     <span className="text-xs text-slate-800 leading-relaxed">
-                      I agree to the <Link to="/terms" target="_blank" className="text-emerald-700 font-bold underline">SDS Terms of Carriage</Link>. I understand that a private quote link will be generated and messaged to the payer on WhatsApp, and courier dispatch occurs upon verified payment.
+                      I agree to the <Link to="/terms" target="_blank" className="text-emerald-700 font-bold underline">SDS Terms of Carriage</Link>. SDS staff will contact the designated payer with a quote and bank transfer instructions. Dispatch begins after staff confirm receipt.
                     </span>
                   </label>
                 </div>

@@ -1,43 +1,49 @@
-# AGENTS.md
+﻿# AGENTS.md
 
-SDS Delivery is a **frontend-only prototype**: React 19 + Vite + Tailwind v4, with no backend. All orders, quotes, riders, payments, and settings are persisted in `localStorage` by `src/services/mock/index.ts`. `express`, `@google/genai`, `dotenv`, and `tsx` are declared but unused — don't assume a server or API exists.
+SDS Delivery is a React 19 + Vite + Tailwind v4 app using Firebase Authentication and Cloud Firestore directly from the web client. There is no custom API server or Cloud Functions. Customers can submit delivery requests without signing in; authorized staff manage orders in Firestore. Quotes, payment instructions, payment confirmation, and customer tracking are coordinated offline by SDS staff. `express`, `@google/genai`, `dotenv`, and `tsx` remain declared but unused.
 
 ## Commands
 
 ```bash
 npm run dev      # Vite on http://localhost:3000 (host 0.0.0.0)
-npm run lint     # tsc --noEmit — the only static check
+npm run lint     # tsc --noEmit
 npm run build    # production build -> dist/ (gitignored)
 npm run preview  # serve the production build
 ```
 
-- No test runner, ESLint, or Prettier is configured. Verify changes with `npm run lint && npm run build`.
-- Use npm: `node_modules` is npm-installed and `package-lock.json` is current. `bun.lock` also exists; don't regenerate either lockfile.
+- No test runner, ESLint, or Prettier is configured. Use `npm run lint` and `npm run build` when asked to verify changes.
+- Use npm: `node_modules` is npm-installed and `package-lock.json` is current. `bun.lock` also exists; do not regenerate either lockfile.
 - `npm run clean` uses `rm -rf`, which fails in PowerShell; delete `dist/` directly if needed.
 
 ## Where things live
 
-- `src/main.tsx` → `src/App.tsx`: all routes. Public pages render under `PublicLayout`; `/rider/*` is a mobile app shell; `/admin/*` is the ops console. Register new pages in `App.tsx`.
-- `src/services/mock/index.ts`: the entire data layer (`OrdersService`, `QuotesService`, `PaymentsService`, `RidersService`, `EarningsService`, `SettingsService`, `AuthService`). Mutations are localStorage writes wrapped in artificial `delay()`s.
-- `src/data/mock/seed.ts`: seed orders/riders/payouts and the quote tokens linked from `/demo`. `src/types/index.ts`: source-of-truth domain types.
-- `src/config/business.ts`: `APP_CONFIG` (currency, timezone, `storageKeyPrefix`) and `DEFAULT_BUSINESS_SETTINGS` (some values marked `PLACEHOLDER`).
-- `.agents/skills/`: repo-local OpenCode skills (design/motion/prototype), not application code.
+- `src/main.tsx` -> `src/App.tsx`: all routes. Public pages render under `PublicLayout`; `/rider/*` is the rider app shell; `/admin/*` is the ops console.
+- `src/lib/firebase.ts`: Firebase Web SDK initialization from `VITE_FIREBASE_*` environment variables.
+- `src/services/firebase/index.ts`: Firestore CRUD and Firebase Authentication services. `src/services/mock/index.ts` is a compatibility re-export.
+- `firestore.rules`: public request creation and staff/rider access rules. `firebase.json` and `.firebaserc` configure Firebase CLI for `sdsdelivery-7d4b2`.
+- `src/data/mock/seed.ts`: legacy prototype fixtures; these are not copied into Firestore. `src/types/index.ts`: source-of-truth domain types.
+- `src/config/business.ts`: currency, timezone, and default business settings.
+- `.agents/skills/`: repo-local OpenCode skills, not application code.
 
 ## Invariants
 
-- **Money is integer kobo** (`100 kobo = ₦1`). Never store naira floats; render with `formatNaira()` from `src/lib/utils.ts`. Dates are displayed in `Africa/Lagos`.
-- **Order status transitions are enforced** by `isValidTransition()` in `src/lib/utils.ts` and checked inside services. Don't assign `order.status` directly; use `OrdersService.updateStatus` or `RidersService.*`.
-- **Auth is fake.** Passwords are ignored; `AuthService.getCurrentUser()` falls back to the owner demo user when storage is empty, so `/admin` is reachable unauthenticated and logout doesn't stick. Role checks only hide UI. Don't treat this as real security or "fix" it unprompted.
-- **Seed data is sticky.** Data lives under `sds_delivery_v1_*` keys, so seed changes won't appear until localStorage is cleared (`/demo` → Reset Demo Seed Data) or `APP_CONFIG.storageKeyPrefix` is bumped.
+- **Money is integer kobo** (`100 kobo = NGN 1`). Never store naira floats; render with `formatNaira()` from `src/lib/utils.ts`. Dates use `Africa/Lagos`.
+- **Order transitions are enforced** by `isValidTransition()` in `src/lib/utils.ts` and checked inside services. Do not assign `order.status` directly; use the order or rider services.
+- **Staff roles are provisioned by an administrator.** Firebase Auth accounts need a matching `staff/{uid}` Firestore document with `name`, `email`, and `role` (`owner`, `manager`, or `rider`). Rider profiles also need `riderId`. Client-side users cannot create or change staff roles.
+- **Firestore rules are the access boundary.** Public users can create validated delivery requests but cannot read orders. Operations staff can manage orders; riders can read and update only assigned deliveries. Add rules when adding collections or queries.
+- **Payment confirmation is manual.** Never add client-side payment confirmation. An authorized administrator records a transfer after verifying receipt offline.
+- **Customer tracking is offline.** The public tracking page directs customers to dispatch. Do not expose order documents or PII to public reads.
+- **Firebase configuration is local.** `.env.local` is ignored by Git. Keep it aligned with `.env.example`; do not commit local environment files.
 
 ## Toolchain gotchas
 
-- `@/*` resolves to the **repo root**, not `src/` (e.g. `@/src/pages/...`). Most imports are relative; match the surrounding style.
+- `@/*` resolves to the repo root, not `src/` (for example `@/src/pages/...`). Most imports are relative; match surrounding style.
 - Tailwind v4: no `tailwind.config.js`. Theme tokens live in `src/index.css` via `@import "tailwindcss"` and `@custom-variant dark`.
-- `vite.config.ts` intentionally disables HMR/watch when `DISABLE_HMR=true` (AI Studio); don't change that block.
-- `.env.example` (`GEMINI_API_KEY`, `APP_URL`) is not read by any current code.
+- `vite.config.ts` intentionally disables HMR/watch when `DISABLE_HMR=true` (AI Studio); do not change that block.
+- `.env.example` includes legacy `GEMINI_API_KEY` and `APP_URL` placeholders plus Firebase Web app configuration placeholders.
 
 ## Manual verification
 
-- `/demo` links to every seeded quote state, tracking lookup, and portal login — use it instead of inventing fixtures.
+- `/demo` describes the current request and dispatch flow. It does not seed data, reset records, or switch accounts.
+- Firebase staff accounts are provisioned in Firebase Console; never use demo passwords or let users self-assign roles.
 - Routes are not lazy-loaded, so the build is one bundle and Vite may warn about chunk size (expected).

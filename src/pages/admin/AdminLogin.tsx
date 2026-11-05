@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ShieldCheck, Mail, Lock, ArrowRight, AlertCircle, Sparkles } from 'lucide-react';
+import { ShieldCheck, Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react';
 import { AuthService } from '../../services/mock';
 
 export const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('admin@sdsdelivery.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -15,21 +15,17 @@ export const AdminLogin: React.FC = () => {
     setIsLoading(true);
     setErrorMsg(null);
     try {
-      // If email has manager, login as manager
-      const role = email.includes('manager') ? 'manager' : 'owner';
-      await AuthService.login(role, email);
+      const user = await AuthService.login(email, password);
+      if (user.role === 'rider') {
+        await AuthService.logout();
+        throw new Error('This account is set up for the rider portal.');
+      }
       navigate('/admin');
-    } catch {
-      setErrorMsg('Login failed.');
+    } catch (error) {
+      setErrorMsg(error instanceof Error ? error.message : 'Login failed. Check your email and password.');
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleQuickRole = async (role: 'owner' | 'manager') => {
-    setIsLoading(true);
-    await AuthService.login(role);
-    navigate('/admin');
   };
 
   return (
@@ -101,29 +97,7 @@ export const AdminLogin: React.FC = () => {
           </button>
         </form>
 
-        {/* Demo Fast Login Shortcuts */}
-        <div className="pt-4 border-t border-slate-100 space-y-2">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 text-center">
-            Demo Staff Roles
-          </p>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <button
-              onClick={() => handleQuickRole('owner')}
-              className="p-2.5 rounded-lg border border-slate-200 hover:border-amber-500 text-left bg-slate-50 transition-colors"
-            >
-              <span className="font-bold text-slate-900 block">Owner (Full Admin)</span>
-              <span className="text-[10px] text-slate-500">Orders, Payouts & Settings</span>
-            </button>
-
-            <button
-              onClick={() => handleQuickRole('manager')}
-              className="p-2.5 rounded-lg border border-slate-200 hover:border-blue-500 text-left bg-slate-50 transition-colors"
-            >
-              <span className="font-bold text-slate-900 block">Operations Manager</span>
-              <span className="text-[10px] text-slate-500">Orders & Quotes Only</span>
-            </button>
-          </div>
-        </div>
+        <p className="text-center text-[11px] text-slate-500">Staff accounts are created by the SDS project owner.</p>
 
         <div className="text-center pt-2">
           <Link to="/" className="text-xs text-slate-500 hover:text-slate-800 underline">

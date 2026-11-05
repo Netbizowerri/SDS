@@ -1,0 +1,304 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // orders/{orderId}: customer contacts, pickup/delivery addresses, parcel
+    // details, status, quote, manually confirmed payment, rider assignment,
+    // delivery proof, and a staff/customer timeline. Public users may create
+    // validated initial requests; only staff and the assigned rider may read.
+    //
+    // staff/{uid}: manually provisioned profile {name, email, role, riderId?}.
+    // Users may read only their own role profile. Client writes are forbidden.
+    //
+    // riders/{riderId}: rider contact, vehicle, and activity fields. Admins
+    // manage rider records; each rider may read their own record.
+    //
+    // payouts/{payoutId}: manually recorded rider payout. Staff can read all;
+    // a rider can read only payout records for their own riderId.
+    //
+    // settings/business: business settings, readable by staff and writable by
+    // the owner role only.
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function uidUnchanged() {
+      return !('uid' in request.resource.data) || request.resource.data.uid == request.auth.uid;
+    }
+
+    function uidNotModified() {
+      return !('uid' in request.resource.data) || request.resource.data.uid == resource.data.uid;
+    }
+
+    function staffPath(uid) {
+      return /databases/$(database)/documents/staff/$(uid);
+    }
+
+    function hasStaffRole(roles) {
+      return isAuthenticated() && exists(staffPath(request.auth.uid)) &&
+        get(staffPath(request.auth.uid)).data.role in roles;
+    }
+
+    function isOwner() { return hasStaffRole(['owner']); }
+    function isOperationsStaff() { return hasStaffRole(['owner', 'manager']); }
+
+    function currentRiderId() {
+      return get(staffPath(request.auth.uid)).data.riderId;
+    }
+
+    function isRider(riderId) {
+      return hasStaffRole(['rider']) && currentRiderId() == riderId;
+    }
+
+    function isOrderReader(data) {
+      return isOperationsStaff() ||
+        (data.keys().hasAny(['assignedRiderId']) &&
+          data.assignedRiderId is string && isRider(data.assignedRiderId));
+    }
+
+    function validString(value, maxLength) {
+      return value is string && value.size() > 0 && value.size() <= maxLength;
+    }
+
+    function validOptionalString(data, key, maxLength) {
+      return !(key in data) || (data[key] is string && data[key].size() <= maxLength);
+    }
+
+    function validAddress(data) {
+      return data is map &&
+        data.keys().hasAll(['country', 'state', 'city', 'streetAddress']) &&
+        data.keys().hasOnly(['country', 'state', 'city', 'streetAddress', 'landmark']) &&
+        validString(data.country, 80) && validString(data.state, 80) &&
+        validString(data.city, 100) && validString(data.streetAddress, 240) &&
+        validOptionalString(data, 'landmark', 120);
+    }
+
+    function validSender(data) {
+      return data is map &&
+        data.keys().hasAll(['fullName', 'phone', 'pickupAddress', 'pickupDate', 'pickupTimeSlot']) &&
+        data.keys().hasOnly(['fullName', 'phone', 'email', 'pickupAddress', 'pickupDate', 'pickupTimeSlot']) &&
+        validString(data.fullName, 120) && validString(data.phone, 40) &&
+        validOptionalString(data, 'email', 160) && validAddress(data.pickupAddress) &&
+        validString(data.pickupDate, 40) && validString(data.pickupTimeSlot, 40);
+    }
+
+    function validReceiver(data) {
+      return data is map &&
+        data.keys().hasAll(['fullName', 'phone', 'deliveryAddress']) &&
+        data.keys().hasOnly(['fullName', 'phone', 'email', 'deliveryAddress', 'preferredDeliveryDate']) &&
+        validString(data.fullName, 120) && validString(data.phone, 40) &&
+        validOptionalString(data, 'email', 160) && validAddress(data.deliveryAddress) &&
+        validOptionalString(data, 'preferredDeliveryDate', 40);
+    }
+
+    function validItem(data) {
+      return data is map &&
+        data.keys().hasAll(['description', 'itemType', 'weightKg', 'size', 'quantity', 'photos', 'declarationConfirmed', 'isExpress']) &&
+        data.keys().hasOnly(['description', 'itemType', 'weightKg', 'size', 'quantity', 'photos', 'specialInstructions', 'declarationConfirmed', 'isExpress']) &&
+        validString(data.description, 500) &&
+        data.itemType in ['documents', 'parcel', 'fragile', 'food', 'electronics', 'clothing', 'other'] &&
+        data.weightKg is number && data.weightKg > 0 && data.weightKg <= 500 &&
+        data.size in ['small', 'medium', 'large', 'extra_large'] &&
+        data.quantity is int && data.quantity > 0 && data.quantity <= 10000 &&
+        data.photos is list && data.photos.size() == 0 &&
+        validOptionalString(data, 'specialInstructions', 1000) &&
+        data.declarationConfirmed is bool && data.isExpress is bool;
+    }
+
+    function validTimelineEvent(event) {
+      return event is map &&
+        event.keys().hasAll(['id', 'title', 'description', 'timestamp', 'actor']) &&
+        event.keys().hasOnly(['id', 'status', 'title', 'description', 'timestamp', 'actor', 'isInternal']) &&
+        validString(event.id, 80) && validString(event.title, 160) &&
+        validString(event.description, 1000) && validString(event.timestamp, 40) &&
+        event.actor in ['customer', 'admin', 'rider', 'system'] &&
+        validOptionalString(event, 'status', 40) &&
+        (!('isInternal' in event) || event.isInternal is bool);
+    }
+
+    function validLastTimelineEvent(data) {
+      return data.timeline is list && data.timeline.size() > 0 && data.timeline.size() <= 100 &&
+        validTimelineEvent(data.timeline[data.timeline.size() - 1]);
+    }
+
+    function validQuote(data) {
+      return data is map &&
+        data.keys().hasAll(['token', 'basePriceKobo', 'expressChargeKobo', 'heavyItemChargeKobo', 'handlingChargeKobo', 'totalKobo', 'validUntil', 'validityHours', 'status', 'createdAt']) &&
+        data.keys().hasOnly(['token', 'basePriceKobo', 'expressChargeKobo', 'heavyItemChargeKobo', 'handlingChargeKobo', 'totalKobo', 'validUntil', 'validityHours', 'notes', 'status', 'viewedAt', 'createdAt']) &&
+        validString(data.token, 80) &&
+        data.basePriceKobo is int && data.basePriceKobo >= 0 &&
+        data.expressChargeKobo is int && data.expressChargeKobo >= 0 &&
+        data.heavyItemChargeKobo is int && data.heavyItemChargeKobo >= 0 &&
+        data.handlingChargeKobo is int && data.handlingChargeKobo >= 0 &&
+        data.totalKobo == data.basePriceKobo + data.expressChargeKobo + data.heavyItemChargeKobo + data.handlingChargeKobo &&
+        validString(data.validUntil, 40) && data.validityHours is int && data.validityHours > 0 && data.validityHours <= 720 &&
+        validOptionalString(data, 'notes', 1000) &&
+        data.status in ['draft', 'sent', 'viewed', 'expired', 'accepted', 'revoked'] &&
+        validString(data.createdAt, 40) && validOptionalString(data, 'viewedAt', 40);
+    }
+
+    function validPayment(data) {
+      return data is map &&
+        data.keys().hasAll(['reference', 'amountKobo', 'paidAt', 'status', 'payer', 'method']) &&
+        data.keys().hasOnly(['reference', 'amountKobo', 'paidAt', 'status', 'payer', 'method', 'manualReason']) &&
+        validString(data.reference, 120) && data.amountKobo is int && data.amountKobo >= 0 &&
+        validString(data.paidAt, 40) && data.status == 'paid' &&
+        data.payer in ['sender', 'receiver'] && data.method == 'manual_bank_transfer' &&
+        validString(data.manualReason, 500);
+    }
+
+    function validDeliveryProof(data) {
+      return data is map &&
+        data.keys().hasAll(['receiverName', 'signatureDataUrl', 'deliveredAt']) &&
+        data.keys().hasOnly(['receiverName', 'signatureDataUrl', 'deliveredAt', 'note']) &&
+        validString(data.receiverName, 120) &&
+        validString(data.signatureDataUrl, 100000) &&
+        validString(data.deliveredAt, 40) && validOptionalString(data, 'note', 1000);
+    }
+
+    function validOrder(data) {
+      return data is map &&
+        data.keys().hasAll(['orderCode', 'createdAt', 'status', 'paymentStatus', 'whoPays', 'sender', 'receiver', 'item', 'timeline']) &&
+        data.keys().hasOnly(['orderCode', 'createdAt', 'status', 'paymentStatus', 'whoPays', 'sender', 'receiver', 'item', 'quote', 'payment', 'assignedRiderId', 'tripPayKobo', 'deliveryProof', 'timeline', 'adminNotes', 'cancellationReason', 'delayReason']) &&
+        data.orderCode.matches('^SDS-[0-9]{6}$') && validString(data.createdAt, 40) &&
+        data.status in ['requested', 'quoted', 'awaiting_payment', 'paid', 'assigned', 'picked_up', 'in_transit', 'delivered', 'cancelled', 'expired'] &&
+        data.paymentStatus in ['unpaid', 'paid', 'failed', 'refunded'] &&
+        data.whoPays in ['sender', 'receiver'] && validSender(data.sender) &&
+        validReceiver(data.receiver) && validItem(data.item) && validLastTimelineEvent(data) &&
+        (!('quote' in data) || validQuote(data.quote)) &&
+        (!('payment' in data) || validPayment(data.payment)) &&
+        (data.paymentStatus != 'paid' || ('payment' in data && 'quote' in data && data.payment.amountKobo <= data.quote.totalKobo)) &&
+        (!('payment' in data) || data.paymentStatus == 'paid') &&
+        (!('quote' in data) || data.status in ['quoted', 'awaiting_payment', 'paid', 'assigned', 'picked_up', 'in_transit', 'delivered', 'cancelled', 'expired']) &&
+        (data.status != 'paid' && data.status != 'assigned' && data.status != 'picked_up' && data.status != 'in_transit' && data.status != 'delivered' || data.paymentStatus == 'paid') &&
+        (data.status != 'assigned' && data.status != 'picked_up' && data.status != 'in_transit' && data.status != 'delivered' || 'assignedRiderId' in data) &&
+        (!('assignedRiderId' in data) || validString(data.assignedRiderId, 100)) &&
+        (!('tripPayKobo' in data) || (data.tripPayKobo is int && data.tripPayKobo >= 0 && data.tripPayKobo <= 100000000)) &&
+        (!('deliveryProof' in data) || validDeliveryProof(data.deliveryProof)) &&
+        (!('adminNotes' in data) || (data.adminNotes is list && data.adminNotes.size() <= 100)) &&
+        validOptionalString(data, 'cancellationReason', 1000) &&
+        validOptionalString(data, 'delayReason', 1000);
+    }
+
+    function validNewOrder(data) {
+      let event = data.timeline[0];
+      return validOrder(data) &&
+        data.keys().hasOnly(['orderCode', 'createdAt', 'status', 'paymentStatus', 'whoPays', 'sender', 'receiver', 'item', 'timeline']) &&
+        data.status == 'requested' && data.paymentStatus == 'unpaid' &&
+        data.timeline.size() == 1 && event.actor == 'customer' && event.status == 'requested' && uidUnchanged();
+    }
+
+    function validStatusTransition(from, to) {
+      return (to == 'cancelled' && from != 'delivered' && from != 'cancelled') ||
+        (from == 'requested' && to == 'quoted') ||
+        (from == 'quoted' && to in ['awaiting_payment', 'paid', 'expired']) ||
+        (from == 'awaiting_payment' && to in ['paid', 'expired']) ||
+        (from == 'paid' && to == 'assigned') ||
+        (from == 'assigned' && to == 'picked_up') ||
+        (from == 'picked_up' && to == 'in_transit') ||
+        (from == 'in_transit' && to == 'delivered') ||
+        (from == 'expired' && to == 'quoted');
+    }
+
+    function validStaffOrderUpdate() {
+      return validOrder(request.resource.data) &&
+        request.resource.data.orderCode == resource.data.orderCode &&
+        request.resource.data.createdAt == resource.data.createdAt &&
+        uidNotModified() &&
+        (request.resource.data.status == resource.data.status ||
+          validStatusTransition(resource.data.status, request.resource.data.status));
+    }
+
+    function validRiderOrderUpdate() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      let event = request.resource.data.timeline[request.resource.data.timeline.size() - 1];
+      return resource.data.assignedRiderId is string && isRider(resource.data.assignedRiderId) &&
+        changed.hasOnly(['status', 'timeline', 'deliveryProof']) &&
+        request.resource.data.status in ['picked_up', 'in_transit', 'delivered'] &&
+        validStatusTransition(resource.data.status, request.resource.data.status) &&
+        validOrder(request.resource.data) &&
+        uidNotModified() &&
+        request.resource.data.timeline.size() == resource.data.timeline.size() + 1 &&
+        event.actor == 'rider' && event.status == request.resource.data.status &&
+        ((request.resource.data.status == 'delivered' &&
+          'deliveryProof' in request.resource.data && validDeliveryProof(request.resource.data.deliveryProof)) ||
+          (request.resource.data.status != 'delivered' && !changed.hasAny(['deliveryProof'])));
+    }
+
+    function validRider(data) {
+      return data is map &&
+        data.keys().hasAll(['fullName', 'phone', 'email', 'vehicleType', 'status', 'completedJobsCount', 'unpaidEarningsKobo', 'totalEarnedKobo']) &&
+        data.keys().hasOnly(['fullName', 'phone', 'email', 'vehicleType', 'status', 'completedJobsCount', 'unpaidEarningsKobo', 'totalEarnedKobo']) &&
+        validString(data.fullName, 120) && validString(data.phone, 40) && validString(data.email, 160) &&
+        data.vehicleType in ['motorcycle', 'van', 'bicycle', 'car'] && data.status in ['active', 'inactive'] &&
+        data.completedJobsCount is int && data.completedJobsCount >= 0 &&
+        data.unpaidEarningsKobo is int && data.unpaidEarningsKobo >= 0 &&
+        data.totalEarnedKobo is int && data.totalEarnedKobo >= 0;
+    }
+
+    function validPayout(data) {
+      return data is map &&
+        data.keys().hasAll(['riderId', 'amountKobo', 'reference', 'paidAt', 'tripsCount']) &&
+        data.keys().hasOnly(['riderId', 'amountKobo', 'reference', 'paidAt', 'tripsCount']) &&
+        validString(data.riderId, 100) && data.amountKobo is int && data.amountKobo > 0 &&
+        validString(data.reference, 120) && validString(data.paidAt, 40) &&
+        data.tripsCount is int && data.tripsCount > 0 && data.tripsCount <= 10000;
+    }
+
+    function validSettings(data) {
+      return data is map &&
+        data.keys().hasAll(['businessName', 'phone', 'whatsappNumber', 'email', 'address', 'cacNumber', 'operatingDays', 'operatingHoursStart', 'operatingHoursEnd', 'closedDayExplanation', 'defaultQuoteValidityHours', 'baseExpressChargeKobo', 'baseHandlingChargeKobo', 'quoteWhatsappTemplate', 'riderWhatsappTemplate']) &&
+        data.keys().hasOnly(['businessName', 'phone', 'whatsappNumber', 'email', 'address', 'cacNumber', 'operatingDays', 'operatingHoursStart', 'operatingHoursEnd', 'closedDayExplanation', 'defaultQuoteValidityHours', 'baseExpressChargeKobo', 'baseHandlingChargeKobo', 'quoteWhatsappTemplate', 'riderWhatsappTemplate']) &&
+        validString(data.businessName, 120) && validString(data.phone, 40) &&
+        validString(data.whatsappNumber, 40) && validString(data.email, 160) &&
+        validString(data.address, 240) && validString(data.cacNumber, 100) &&
+        data.operatingDays is list && data.operatingDays.size() <= 7 &&
+        validString(data.operatingHoursStart, 10) && validString(data.operatingHoursEnd, 10) &&
+        validString(data.closedDayExplanation, 500) &&
+        data.defaultQuoteValidityHours is int && data.defaultQuoteValidityHours > 0 && data.defaultQuoteValidityHours <= 720 &&
+        data.baseExpressChargeKobo is int && data.baseExpressChargeKobo >= 0 &&
+        data.baseHandlingChargeKobo is int && data.baseHandlingChargeKobo >= 0 &&
+        validString(data.quoteWhatsappTemplate, 2000) && validString(data.riderWhatsappTemplate, 2000);
+    }
+
+    match /staff/{uid} {
+      allow get: if isAuthenticated() && request.auth.uid == uid;
+      allow list, create, update, delete: if false;
+    }
+
+    match /orders/{orderId} {
+      allow create: if validNewOrder(request.resource.data);
+      allow get, list: if isOrderReader(resource.data);
+      allow update: if isOperationsStaff() && validStaffOrderUpdate() || validRiderOrderUpdate();
+      allow delete: if false;
+    }
+
+    match /riders/{riderId} {
+      allow get: if isOperationsStaff() || isRider(riderId);
+      allow list: if isOperationsStaff();
+      allow create: if isOperationsStaff() && validRider(request.resource.data);
+      allow update: if isOperationsStaff() && validRider(request.resource.data);
+      allow delete: if isOwner();
+    }
+
+    match /payouts/{payoutId} {
+      allow get, list: if isOperationsStaff() || isRider(resource.data.riderId);
+      allow create: if isOwner() && validPayout(request.resource.data);
+      allow update, delete: if false;
+    }
+
+    match /settings/{settingId} {
+      allow get, list: if isOperationsStaff();
+      allow create, update: if isOwner() && settingId == 'business' && validSettings(request.resource.data);
+      allow delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

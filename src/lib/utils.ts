@@ -95,7 +95,7 @@ export function isValidTransition(from: OrderStatus, to: OrderStatus): boolean {
 
   const allowedNext: Record<OrderStatus, OrderStatus[]> = {
     requested: ['quoted', 'cancelled'],
-    quoted: ['awaiting_payment', 'expired', 'cancelled'],
+    quoted: ['awaiting_payment', 'paid', 'expired', 'cancelled'],
     awaiting_payment: ['paid', 'expired', 'cancelled'],
     paid: ['assigned', 'cancelled'],
     assigned: ['picked_up', 'cancelled'],

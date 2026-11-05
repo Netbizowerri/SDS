@@ -54,7 +54,7 @@ export const Home: React.FC = () => {
               </h1>
 
               <p className="text-base sm:text-lg text-slate-300 max-w-xl leading-relaxed">
-                Book deliveries across town or across states. Get transparent private quotes delivered directly to your WhatsApp, pay securely online, and track with digital signature proof.
+                Book deliveries across town or across states. SDS staff will contact you with a quote and transfer details, confirm payment, then assign a rider.
               </p>
 
               {/* CTAs */}
@@ -100,7 +100,7 @@ export const Home: React.FC = () => {
                   </button>
                 </form>
                 <p className="text-[11px] text-slate-400 mt-1.5 pl-1">
-                  Have a private quote link? Open it directly from your WhatsApp message.
+                  For quote, payment, or delivery updates, contact SDS dispatch with your order code.
                 </p>
               </div>
             </div>
@@ -167,9 +167,9 @@ export const Home: React.FC = () => {
               <span className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 font-bold text-sm flex items-center justify-center mb-4">
                 2
               </span>
-              <h4 className="text-base font-semibold text-slate-900 mb-2">Get Quote on WhatsApp</h4>
+              <h4 className="text-base font-semibold text-slate-900 mb-2">Get Quote from Dispatch</h4>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Our operations team calculates the exact route charge and sends a private, unguessable quote link valid for 72 hours.
+                Our operations team reviews the route and sends your quote and payment details directly by WhatsApp or phone.
               </p>
             </div>
 
@@ -178,9 +178,9 @@ export const Home: React.FC = () => {
               <span className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 font-bold text-sm flex items-center justify-center mb-4">
                 3
               </span>
-              <h4 className="text-base font-semibold text-slate-900 mb-2">Pay Securely Online</h4>
+              <h4 className="text-base font-semibold text-slate-900 mb-2">Pay by Transfer</h4>
               <p className="text-xs text-slate-600 leading-relaxed">
-                The designated payer opens the private link and checks out with Paystack (Card, Bank, or Transfer). No account needed.
+                Pay using the bank details sent to you by SDS. Our team confirms receipt manually before dispatch.
               </p>
             </div>
 
@@ -189,9 +189,9 @@ export const Home: React.FC = () => {
               <span className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 font-bold text-sm flex items-center justify-center mb-4">
                 4
               </span>
-              <h4 className="text-base font-semibold text-slate-900 mb-2">Track & Sign Proof</h4>
+              <h4 className="text-base font-semibold text-slate-900 mb-2">Dispatch & Delivery</h4>
               <p className="text-xs text-slate-600 leading-relaxed">
-                A dedicated courier is assigned. See direct phone contact, watch status milestones, and view digital signature on delivery.
+                After payment is confirmed, a dedicated rider is assigned. Contact SDS staff for progress updates and proof of delivery.
               </p>
             </div>
           </div>
@@ -297,16 +297,16 @@ export const Home: React.FC = () => {
                 <div className="flex items-start gap-3">
                   <FileCheck className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-sm font-semibold text-white">Private Forwardable Quotes</h4>
-                    <p className="text-xs text-slate-400 mt-0.5">Masked phone numbers ensure data privacy when forwarded.</p>
+                    <h4 className="text-sm font-semibold text-white">Personal Quote Support</h4>
+                    <p className="text-xs text-slate-400 mt-0.5">SDS staff share quotes and payment instructions directly with the customer.</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-sm font-semibold text-white">Secure Paystack Payments</h4>
-                    <p className="text-xs text-slate-400 mt-0.5">Direct card, bank debit, or instant virtual account transfers.</p>
+                    <h4 className="text-sm font-semibold text-white">Manual Payment Confirmation</h4>
+                    <p className="text-xs text-slate-400 mt-0.5">Our operations team verifies transfer receipt before dispatch.</p>
                   </div>
                 </div>
               </div>
@@ -357,7 +357,7 @@ export const Home: React.FC = () => {
                 Can the receiver pay for the delivery instead of the sender?
               </h4>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Yes. During request submission, you select whether the Sender or Receiver pays. The private quote link can be freely forwarded to whichever party is paying, with phone numbers safely masked for privacy.
+                Yes. During request submission, select whether the sender or receiver pays. SDS staff will contact the designated payer directly.
               </p>
             </div>
 
@@ -366,7 +366,7 @@ export const Home: React.FC = () => {
                 How long is my delivery quote valid?
               </h4>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Quotes are typically valid for 72 hours from the moment our dispatch team generates your link. If a quote expires, you can tap a single button to request a refreshed quote on WhatsApp.
+                SDS staff will include the quote validity period when they contact you. Message dispatch if you need updated pricing or payment details.
               </p>
             </div>
 

@@ -20,12 +20,25 @@ import { formatNaira, formatLagosDate } from '../../lib/utils';
 export const AdminDashboard: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [newRequestNotice, setNewRequestNotice] = useState<string | null>(null);
 
   useEffect(() => {
+    let active = true;
+    let unsubscribe: (() => void) | undefined;
     OrdersService.list().then((data) => {
+      if (!active) return;
       setOrders(data);
       setIsLoading(false);
+      unsubscribe = OrdersService.subscribeToNewRequests((requests) => {
+        setOrders((current) => [...current.filter((order) => order.status !== 'requested'), ...requests]);
+      }, (order) => setNewRequestNotice(order.orderCode));
+    }).catch(() => {
+      if (active) setIsLoading(false);
     });
+    return () => {
+      active = false;
+      unsubscribe?.();
+    };
   }, []);
 
   if (isLoading) {
@@ -115,6 +128,16 @@ export const AdminDashboard: React.FC = () => {
           <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
+
+      {newRequestNotice && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-xs">
+          <p className="font-semibold text-emerald-950">New delivery request received: {newRequestNotice}</p>
+          <div className="flex items-center gap-3">
+            <Link to={`/admin/orders/${encodeURIComponent(newRequestNotice)}`} className="font-bold text-emerald-800 underline">Review request</Link>
+            <button onClick={() => setNewRequestNotice(null)} className="text-emerald-800 hover:text-emerald-950">Dismiss</button>
+          </div>
+        </div>
+      )}
 
       {/* 6 KPI Cards per PRD 9 */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">

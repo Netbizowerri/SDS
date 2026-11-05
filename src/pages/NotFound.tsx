@@ -16,7 +16,7 @@ export const NotFound: React.FC = () => {
         <h2 className="text-lg font-bold text-slate-800">Page Not Found</h2>
 
         <p className="text-xs text-slate-600 leading-relaxed">
-          The dispatch link or page you are looking for does not exist or has been moved. If you received a quote link from SDS, make sure the full URL was copied.
+          The page you are looking for does not exist or has been moved. Contact SDS dispatch if you need help with a delivery request.
         </p>
 
         <div className="space-y-2.5 pt-3">

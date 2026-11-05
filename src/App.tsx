@@ -1,5 +1,6 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { AuthService } from './services/firebase';
 
 // Public Layout & Pages
 import { PublicLayout } from './components/layout/PublicLayout';
@@ -36,7 +37,24 @@ import { AdminRiders } from './pages/admin/AdminRiders';
 import { AdminPayments } from './pages/admin/AdminPayments';
 import { AdminSettings } from './pages/admin/AdminSettings';
 
+function RequireRole({ roles }: { roles: Array<'owner' | 'manager' | 'rider'> }) {
+  const user = AuthService.getCurrentUser();
+  if (!user) return <Navigate to={roles.includes('rider') ? '/rider/login' : '/admin/login'} replace />;
+  if (roles.includes(user.role)) return <Outlet />;
+  return <Navigate to={user.role === 'rider' ? '/rider' : '/admin'} replace />;
+}
+
 export default function App() {
+  const [authReady, setAuthReady] = useState(false);
+
+  useEffect(() => {
+    AuthService.initialize().finally(() => setAuthReady(true));
+  }, []);
+
+  if (!authReady) {
+    return <div className="min-h-screen flex items-center justify-center text-sm text-slate-500">Connecting to SDS…</div>;
+  }
+
   return (
     <BrowserRouter>
       <Routes>
@@ -60,23 +78,29 @@ export default function App() {
 
         {/* Rider Portal Routes (Mobile App Shell) */}
         <Route path="/rider/login" element={<RiderLogin />} />
-        <Route path="/rider" element={<RiderLayout />}>
-          <Route index element={<RiderJobs />} />
-          <Route path="jobs/:id" element={<RiderJobDetail />} />
-          <Route path="jobs/:id/signature" element={<RiderSignature />} />
-          <Route path="earnings" element={<RiderEarnings />} />
-          <Route path="profile" element={<RiderProfile />} />
+        <Route element={<RequireRole roles={['rider']} />}>
+          <Route path="/rider" element={<RiderLayout />}>
+            <Route index element={<RiderJobs />} />
+            <Route path="jobs/:id" element={<RiderJobDetail />} />
+            <Route path="jobs/:id/signature" element={<RiderSignature />} />
+            <Route path="earnings" element={<RiderEarnings />} />
+            <Route path="profile" element={<RiderProfile />} />
+          </Route>
         </Route>
 
         {/* Admin Console Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="orders" element={<AdminOrders />} />
-          <Route path="orders/:id" element={<AdminOrderDetail />} />
-          <Route path="riders" element={<AdminRiders />} />
-          <Route path="payments" element={<AdminPayments />} />
-          <Route path="settings" element={<AdminSettings />} />
+        <Route element={<RequireRole roles={['owner', 'manager']} />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="orders" element={<AdminOrders />} />
+            <Route path="orders/:id" element={<AdminOrderDetail />} />
+            <Route path="riders" element={<AdminRiders />} />
+            <Route path="payments" element={<AdminPayments />} />
+            <Route element={<RequireRole roles={['owner']} />}>
+              <Route path="settings" element={<AdminSettings />} />
+            </Route>
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

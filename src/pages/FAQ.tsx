@@ -9,27 +9,27 @@ export const FAQ: React.FC = () => {
   const faqs = [
     {
       q: 'How does quote-to-cash booking work at SDS?',
-      a: 'First, you submit your pickup and delivery details on our Request page. Our human dispatch team reviews the route, package weight, and timing, then calculates an exact rate and sends a private quote link directly to your WhatsApp. Once paid securely online via Paystack, a dedicated dispatch courier is assigned immediately.',
+      a: 'First, you submit your pickup and delivery details on our Request page. Our dispatch team reviews the route, package weight, and timing, then contacts you with a quote and bank transfer details. After staff confirm receipt, a rider is assigned.',
     },
     {
       q: 'Can the receiver pay for the delivery instead of the sender?',
-      a: 'Absolutely! On Step 3 of the request form, you specify who pays (Sender or Receiver). The private quote link is designed to be forwarded to whichever party is paying. To protect customer privacy when the link is forwarded, the page displays first names only and masks phone numbers (e.g., +234 810 *** **60).',
+      a: 'Absolutely! On the request form, specify whether the sender or receiver pays. SDS staff will contact the designated payer directly with the quote and transfer details.',
     },
     {
       q: 'What payment methods do you support?',
-      a: 'We accept all Nigerian bank debit cards (Mastercard, Visa, Verve), instant bank debits, and dynamic virtual account bank transfers through Paystack. For corporate accounts, manual bank transfers can be arranged with operations.',
+      a: 'SDS staff will send bank transfer instructions directly after reviewing your request. An administrator confirms receipt before dispatch.',
     },
     {
-      q: 'How long is a quote link valid?',
-      a: 'Quotes are typically valid for 72 hours from the moment our dispatch desk issues the link. The quote page features a live countdown timer. If your quote expires before payment, the link shows an expired notice with an instant WhatsApp button to request a fresh quote.',
+      q: 'How long is a quote valid?',
+      a: 'The dispatch team will include the quote validity period when they contact you. Message SDS if you need an updated quote or payment instructions.',
     },
     {
       q: 'Do you offer live GPS vehicle tracking?',
-      a: 'SDS provides milestone-based tracking (Request received, Quote sent, Paid, Rider assigned, Picked up, In transit, Delivered). Because of battery efficiency and rider safety on motorcycles, we do not stream continuous live GPS. Instead, we connect you directly with your assigned courier with one-click Call and WhatsApp buttons.',
+      a: 'Shipment updates are shared by SDS staff. Message dispatch with your order code and we will check the latest status for you.',
     },
     {
       q: 'What proof of delivery is provided?',
-      a: 'Every delivery culminates in digital proof. The courier captures the full recipient name and records their digital handwritten signature directly on their device screen upon handover. This signature and timestamp remain permanently accessible in your tracking link.',
+      a: 'The rider records the recipient name and digital signature at handover. Contact SDS dispatch for delivery confirmation and proof.',
     },
     {
       q: 'What are your operating hours?',

@@ -14,7 +14,6 @@ import {
   AlertTriangle,
   AlertCircle,
   Copy,
-  ExternalLink,
   MessageSquare,
   Lock,
   RotateCw,
@@ -136,16 +135,13 @@ export const AdminOrderDetail: React.FC = () => {
       Number(handlingChargeNaira)) *
     100;
 
-  const currentHost = window.location.origin;
-  const quoteUrl = order.quote ? `${currentHost}/quote/${order.quote.token}` : '';
-
-  // Prefilled WhatsApp quote message
+  // Prefilled offline quote message
   const quoteWhatsappMessage = order.quote
     ? settings.quoteWhatsappTemplate
         .replace('{customerName}', order.whoPays === 'sender' ? order.sender.fullName : order.receiver.fullName)
         .replace('{orderCode}', order.orderCode)
         .replace('{total}', formatNaira(order.quote.totalKobo))
-        .replace('{link}', quoteUrl)
+        .replace('{link}', 'Please contact SDS Dispatch directly for payment instructions.')
         .replace('{validUntil}', formatLagosDate(order.quote.validUntil))
     : '';
 
@@ -164,7 +160,7 @@ export const AdminOrderDetail: React.FC = () => {
         notes: quoteNotes || undefined,
       });
       setOrder(res.order);
-      alert(isRevise ? 'Quote revised! Old token invalidated and new link created.' : 'Quote link generated successfully!');
+      alert(isRevise ? 'Quote updated. Contact the customer directly with the revised quote and payment instructions.' : 'Quote prepared. Contact the customer directly with the quote and payment instructions.');
     } catch (err: any) {
       alert(err.message || 'Error creating quote.');
     } finally {
@@ -174,7 +170,7 @@ export const AdminOrderDetail: React.FC = () => {
 
   // Revoke quote
   const handleRevokeQuote = async () => {
-    if (window.confirm('Are you sure you want to revoke this quote link? The customer will no longer be able to pay.')) {
+    if (window.confirm('Cancel this quote? The customer will need to contact SDS for updated pricing and payment instructions.')) {
       const updated = await QuotesService.revokeLink(order.id);
       setOrder(updated);
     }
@@ -246,7 +242,7 @@ export const AdminOrderDetail: React.FC = () => {
         .replace('{deliveryCity}', order.receiver.deliveryAddress.city)
         .replace('{pickupTime}', order.sender.pickupTimeSlot)
         .replace('{tripPay}', formatNaira(order.tripPayKobo || 350000))
-        .replace('{link}', `${currentHost}/rider/jobs/${order.id}`)
+        .replace('{link}', `${window.location.origin}/rider/jobs/${order.id}`)
     : '';
 
   return (
@@ -354,46 +350,15 @@ export const AdminOrderDetail: React.FC = () => {
       {/* TAB 1: QUOTE COMPOSER */}
       {activeTab === 'quote' && (
         <div className="bg-white rounded-b-2xl border-x border-b border-slate-200 p-6 sm:p-8 space-y-8 shadow-sm">
-          {/* Active quote link banner if exists */}
           {order.quote && (
             <div className="p-4 bg-sky-50/70 border border-sky-200 rounded-xl space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-sky-600 animate-pulse" />
-                  <span className="text-xs font-bold text-sky-950 uppercase">
-                    Active Private Quote Link ({order.quote.status})
-                  </span>
-                </div>
-                <span className="text-xs text-sky-800 font-mono">
-                  Valid until {formatLagosDate(order.quote.validUntil)}
-                </span>
+                <span className="text-xs font-bold text-sky-950 uppercase">Quote prepared ({order.quote.status})</span>
+                <span className="text-xs text-sky-800 font-mono">Valid until {formatLagosDate(order.quote.validUntil)}</span>
               </div>
-
-              {/* Warning per PRD 7 */}
               <p className="text-[11px] text-sky-900 font-medium">
-                ⚠️ Anyone with this private token link can view and pay this quote. Phone numbers are automatically masked on the customer view.
+                Send the quote by WhatsApp or phone. Provide transfer details directly, then confirm receipt here before assigning a rider.
               </p>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <input
-                  type="text"
-                  readOnly
-                  value={quoteUrl}
-                  className="flex-1 min-w-[280px] px-3 py-2 bg-white border border-sky-300 rounded-lg text-xs font-mono text-slate-800 select-all"
-                />
-                <CopyButton text={quoteUrl} label="Copy Link" />
-                <a
-                  href={quoteUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-3 py-2 bg-white border border-sky-300 rounded-lg text-xs font-semibold text-sky-800 hover:bg-sky-100 flex items-center gap-1"
-                >
-                  <span>Preview Page</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-              </div>
-
-              {/* WhatsApp prefilled link */}
               <div className="pt-2 flex flex-wrap items-center gap-3">
                 <WhatsAppButton
                   phone={customerPhone}
@@ -406,7 +371,7 @@ export const AdminOrderDetail: React.FC = () => {
                   onClick={handleRevokeQuote}
                   className="px-3 py-1.5 text-xs text-rose-700 hover:text-rose-900 underline font-medium"
                 >
-                  Revoke this link
+                  Cancel this quote
                 </button>
               </div>
             </div>
@@ -672,7 +637,7 @@ export const AdminOrderDetail: React.FC = () => {
             <div className="p-6 bg-slate-50 rounded-xl border border-slate-200 space-y-4 text-xs">
               <div className="flex items-center gap-2 text-slate-700 font-semibold">
                 <Clock className="w-4 h-4 text-amber-500" />
-                <span>No verified online payment recorded yet.</span>
+                <span>No payment has been confirmed by SDS staff yet.</span>
               </div>
               <p className="text-slate-500 leading-relaxed">
                 If the customer has paid via direct bank transfer into SDS account, you can manually record and mark this order as paid.
@@ -746,7 +711,7 @@ export const AdminOrderDetail: React.FC = () => {
           {order.paymentStatus !== 'paid' && !isOwner && (
             <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-              <span>Rider assignment is locked until payment is verified.</span>
+              <span>Rider assignment is locked until an administrator confirms payment.</span>
             </div>
           )}
 

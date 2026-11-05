@@ -23,7 +23,7 @@ export const RiderJobs: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const currentUser = AuthService.getCurrentUser();
-  const riderId = currentUser?.riderId || 'rider-1';
+  const riderId = currentUser?.riderId || '';
 
   const loadJobs = async (isPull = false) => {
     if (isPull) setIsRefreshing(true);

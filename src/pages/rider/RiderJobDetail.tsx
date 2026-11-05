@@ -31,7 +31,7 @@ export const RiderJobDetail: React.FC = () => {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const currentUser = AuthService.getCurrentUser();
-  const riderId = currentUser?.riderId || 'rider-1';
+  const riderId = currentUser?.riderId || '';
 
   const loadJob = async () => {
     if (!id) return;

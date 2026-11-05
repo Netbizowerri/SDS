@@ -20,8 +20,8 @@ import { buildWhatsAppLink } from '../lib/utils';
 export const Login: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'rider' | 'admin' | 'register'>('rider');
-  const [email, setEmail] = useState('rider.tunde@sdsdelivery.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -38,13 +38,6 @@ export const Login: React.FC = () => {
   const handleTabChange = (tab: 'rider' | 'admin' | 'register') => {
     setActiveTab(tab);
     setErrorMsg(null);
-    if (tab === 'rider') {
-      setEmail('rider.tunde@sdsdelivery.com');
-      setPassword('password123');
-    } else if (tab === 'admin') {
-      setEmail('admin@sdsdelivery.com');
-      setPassword('adminpass');
-    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -57,13 +50,16 @@ export const Login: React.FC = () => {
     setIsLoading(true);
     setErrorMsg(null);
     try {
-      if (activeTab === 'rider') {
-        await AuthService.login('rider', email);
+      const user = await AuthService.login(email, password);
+      if (activeTab === 'rider' && user.role === 'rider') {
         navigate('/rider');
-      } else {
-        const role = email.toLowerCase().includes('manager') ? 'manager' : 'owner';
-        await AuthService.login(role, email);
+      } else if (activeTab === 'admin' && user.role !== 'rider') {
         navigate('/admin');
+      } else {
+        await AuthService.logout();
+        setErrorMsg(activeTab === 'rider'
+          ? 'This account is set up for the operations console.'
+          : 'This account is set up for the rider portal.');
       }
     } catch {
       setErrorMsg('Invalid login credentials. Please verify your email and password.');

@@ -32,7 +32,7 @@ export const About: React.FC = () => {
               At SDS, we believe high-value shipments, delicate parcels, and urgent corporate documentation should not be left to the chance of anonymous automated gig workers.
             </p>
             <p>
-              Our operations combine the best of both worlds: digital multi-step quoting with instant Paystack checkout, paired with hands-on human dispatch supervision. Every job is manually assigned to a vetted courier whose details and direct phone line are immediately placed in the hands of both sender and receiver.
+              Our operations combine digital delivery requests with hands-on human dispatch supervision. Staff share quotes and transfer instructions directly, confirm payment, and assign each job to a vetted courier.
             </p>
             <div className="pt-2">
               <Link

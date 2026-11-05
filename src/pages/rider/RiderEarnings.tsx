@@ -15,7 +15,7 @@ export const RiderEarnings: React.FC = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const currentUser = AuthService.getCurrentUser();
-  const riderId = currentUser?.riderId || 'rider-1';
+  const riderId = currentUser?.riderId || '';
 
   useEffect(() => {
     EarningsService.getForRider(riderId).then((data) => {
