@@ -177,7 +177,7 @@ export const AdminLayout: React.FC = () => {
       )}
 
       {/* Main Admin Workspace Viewport */}
-      <main className="flex-1 overflow-y-auto min-h-screen">
+      <main data-route-scroll className="flex-1 overflow-y-auto min-h-screen">
         <Outlet />
       </main>
     </div>

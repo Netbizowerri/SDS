@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { AuthService } from './services/firebase';
 
 // Public Layout & Pages
@@ -44,6 +44,20 @@ function RequireRole({ roles }: { roles: Array<'owner' | 'manager' | 'rider'> })
   return <Navigate to={user.role === 'rider' ? '/rider' : '/admin'} replace />;
 }
 
+function ScrollToTop() {
+  const { pathname, search } = useLocation();
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+    document.querySelectorAll<HTMLElement>('[data-route-scroll]').forEach((element) => {
+      element.scrollTop = 0;
+      element.scrollLeft = 0;
+    });
+  }, [pathname, search]);
+
+  return null;
+}
+
 export default function App() {
   const [authReady, setAuthReady] = useState(false);
 
@@ -57,6 +71,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         {/* Public Website Routes */}
         <Route element={<PublicLayout />}>

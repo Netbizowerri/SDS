@@ -34,7 +34,7 @@ export const RiderLayout: React.FC = () => {
         </div>
 
         {/* Content Area */}
-        <main className="flex-1 pb-20 overflow-y-auto">
+        <main data-route-scroll className="flex-1 pb-20 overflow-y-auto">
           <Outlet />
         </main>
 
