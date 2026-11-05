@@ -9,10 +9,8 @@ import {
   DollarSign,
   AlertTriangle,
   ArrowRight,
-  TrendingUp,
-  Package,
 } from 'lucide-react';
-import { OrdersService, PaymentsService } from '../../services/mock';
+import { OrdersService } from '../../services/mock';
 import { Order } from '../../types';
 import { StatusBadge } from '../../components/ui/Badge';
 import { formatNaira, formatLagosDate } from '../../lib/utils';
@@ -93,19 +91,6 @@ export const AdminDashboard: React.FC = () => {
         desc: `Customer ${o.sender.fullName} has not completed payment yet.`,
       })),
   ];
-
-  // Daily volume bar breakdown (mock last 7 days distribution)
-  const days = [
-    { day: 'Mon', count: 14, revenue: 168000 },
-    { day: 'Tue', count: 19, revenue: 228000 },
-    { day: 'Wed', count: 23, revenue: 276000 },
-    { day: 'Thu', count: 18, revenue: 216000 },
-    { day: 'Fri', count: 28, revenue: 336000 },
-    { day: 'Sat', count: 22, revenue: 264000 },
-    { day: 'Sun', count: 2, revenue: 24000 }, // fleet servicing day
-  ];
-
-  const maxCount = Math.max(...days.map((d) => d.count));
 
   return (
     <div className="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
@@ -226,10 +211,8 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Grid: Needs Attention & Daily Volume Chart */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Needs Attention List */}
-        <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      {/* Needs Attention List */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-5 border-b border-slate-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-500" />
@@ -278,42 +261,6 @@ export const AdminDashboard: React.FC = () => {
               ))
             )}
           </div>
-        </div>
-
-        {/* Right Column: Weekly Volume Chart */}
-        <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
-              <TrendingUp className="w-4 h-4 text-emerald-600" />
-              Weekly Dispatch Volume
-            </h2>
-            <span className="text-[11px] text-slate-500">Orders / Day</span>
-          </div>
-
-          {/* Simple clean CSS Bar Chart */}
-          <div className="pt-4 flex items-end justify-between h-44 border-b border-slate-200 pb-2 gap-2">
-            {days.map((d, i) => {
-              const heightPct = Math.round((d.count / maxCount) * 100);
-              return (
-                <div key={i} className="flex-1 flex flex-col items-center gap-1.5 group">
-                  <span className="text-[10px] text-slate-400 font-mono opacity-0 group-hover:opacity-100 transition-opacity">
-                    {d.count}
-                  </span>
-                  <div
-                    style={{ height: `${heightPct}%` }}
-                    className="w-full bg-slate-800 group-hover:bg-emerald-600 rounded-t transition-all duration-300 relative"
-                  />
-                  <span className="text-[11px] font-medium text-slate-500">{d.day}</span>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
-            <span>Peak Day: <strong>Friday (28 trips)</strong></span>
-            <span>Sunday: Fleet Servicing (2 runs)</span>
-          </div>
-        </div>
       </div>
 
       {/* Recent Orders Table */}
@@ -341,7 +288,13 @@ export const AdminDashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {orders.slice(0, 6).map((o) => (
+              {orders.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-10 px-4 text-center text-slate-500">
+                    No delivery requests yet. New customer requests will appear here.
+                  </td>
+                </tr>
+              ) : orders.slice(0, 6).map((o) => (
                 <tr key={o.id} className="hover:bg-slate-50 transition-colors">
                   <td className="py-3 px-4 font-mono font-bold text-slate-900">
                     <Link to={`/admin/orders/${o.id}`} className="hover:text-emerald-700">
